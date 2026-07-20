@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Add / Update Product · StellarNet{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding-top: 20px;">
+  <div class="sct-hero sct-slide-up-anim" style="padding: 32px 40px; margin-bottom: 32px;">
+    <div class="sct-hero-content">
+      <h1 style="font-size:32px;">Register Payload</h1>
+      <p style="font-size:15px; margin-top:8px;">
+        {% if role == 'Manufacturer' %}
+        Register a new manufactured item onto the immutable ledger.
+        {% elif role == 'Distributor' %}
+        Record transit and logistics details securely.
+        {% elif role == 'Retailer' %}
+        Confirm final delivery and make product available for sale.
+        {% else %}
+        Record a new state change for this product.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="sct-panel sct-slide-up-anim sct-delay-1" style="padding: 40px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px;">
+      <h3 style="font-size: 22px;">Payload Details</h3>
+      <span class="sct-badge sct-badge-active">Node: {{ role }}</span>
+    </div>
+
+    <form method="POST" class="sct-form">
+      <div class="sct-field">
+        <input type="text" id="product_id" name="product_id" class="sct-input" placeholder=" " required>
+        <label for="product_id" class="sct-label">Product ID (e.g. P12345)</label>
+      </div>
+
+      <div class="sct-field">
+        <textarea id="description" name="description" class="sct-input" placeholder=" " rows="5" required></textarea>
+        <label for="description" class="sct-label">Cryptographic Note / Description</label>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top: 16px;">
+        <a href="{{ url_for('dashboard') }}" class="sct-btn sct-btn-outline"
+          style="padding: 12px 20px; font-size:13px;">
+          ← Back to Network
+        </a>
+        <button type="submit" class="sct-btn sct-btn-secondary">
+          Mint Block
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

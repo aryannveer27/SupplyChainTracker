@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Track Product · StellarNet{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px; margin:0 auto; padding-top:20px;">
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px;"
+    class="sct-slide-up-anim">
+    <div>
+      <span class="sct-badge sct-badge-transit" style="margin-bottom:12px;">Trace Provenance</span>
+      <h1 style="font-size:36px; margin-bottom:8px;">Product Chronicle</h1>
+      <p style="color:var(--sct-text-dim); font-size:15px; margin:0;">
+        Immutable history for Entity ID <strong
+          style="color:#fff; font-family:monospace; padding:4px 8px; background:rgba(255,255,255,0.05); border-radius:6px; margin-left:6px;">{{
+          pid }}</strong>
+      </p>
+    </div>
+    <a class="sct-btn sct-btn-outline" href="{{ url_for('track') }}" style="padding:10px 16px; font-size:13px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      New Search
+    </a>
+  </div>
+
+  {% if pid %}
+  {% if history %}
+  <div class="sct-dash-section">
+
+    <!-- Timeline Flow -->
+    <div class="sct-panel sct-slide-up-anim sct-delay-1" style="padding:32px;">
+      <h3 style="margin-bottom:24px; font-size:18px;">Execution Timeline</h3>
+      <div class="sct-timeline">
+        {% for block in history %}
+        <div class="sct-timeline-item">
+          <div class="sct-timeline-marker"></div>
+          <div class="sct-timeline-content">
+            <div class="sct-timeline-head">
+              <span class="sct-timeline-role">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  style="margin-right:6px; vertical-align:-2px; color:var(--sct-violet-2);">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                {{ block.data.by | title }}
+              </span>
+              <span class="sct-timeline-time">{{ block.timestamp | datetimeformat }}</span>
+            </div>
+            <div class="sct-timeline-desc">{{ block.data.description }}</div>
+            <div
+              style="margin-top:12px; font-size:11px; color:var(--sct-text-faint); font-family:monospace; padding-top:12px; border-top:1px solid var(--sct-card-border);">
+              Block Index #{{ block.index }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Verification Data & QR -->
+    <div style="display:flex; flex-direction:column; gap:24px;" class="sct-slide-up-anim sct-delay-2">
+
+      <div class="sct-panel"
+        style="padding:32px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+        <div class="sct-status-indicator sct-status-live" style="margin:0 auto 16px;"></div>
+        <h3 style="margin-bottom:8px; font-size:18px;">Cryptographic ID</h3>
+        <p style="font-size:13px; color:var(--sct-text-dim); margin-bottom:24px; line-height:1.5;">Scan to instantly
+          access the verified blockchain state of this item on any mobile device.</p>
+
+        <div class="sct-qr-container">
+          <img src="data:image/png;base64,{{ qr }}" alt="QR Code for {{ pid }}" width="180" height="180"
+            style="display:block;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Detailed Ledger -->
+  <div class="sct-panel sct-slide-up-anim sct-delay-3" style="margin-top:24px; padding:0;">
+    <div style="padding:24px 32px; border-bottom:1px solid var(--sct-card-border);">
+      <h3 style="font-size:18px;">Detailed Ledger Block Data</h3>
+    </div>
+    <div class="sct-table-container" style="border:none; border-radius:0;">
+      <table class="sct-table">
+        <thead>
+          <tr>
+            <th style="width:10%">Block IDX</th>
+            <th style="width:20%">Consensus Node</th>
+            <th>Payload Content</th>
+            <th style="width:25%">Network Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for block in history %}
+          <tr>
+            <td><span class="sct-badge sct-badge-pending">#{{ block.index }}</span></td>
+            <td style="font-weight:500;">{{ block.data.by | title }}</td>
+            <td style="color:var(--sct-text-dim);">{{ block.data.description }}</td>
+            <td style="font-family:monospace; color:var(--sct-violet-2);">{{ block.timestamp | datetimeformat }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="sct-panel sct-slide-up-anim" style="padding:60px 40px; text-align:center;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+      stroke-linecap="round" stroke-linejoin="round" style="color:var(--sct-pink); margin-bottom:20px; opacity:0.8;">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="15" y1="9" x2="9" y2="15"></line>
+      <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+    <h3 style="margin-bottom:12px; font-size:20px;">No Provenance Record Found</h3>
+    <p style="color:var(--sct-text-dim); max-width:400px; margin:0 auto; line-height:1.5;">This Product ID does not
+      exist on the ledger or has not been registered by a Manufacturer yet.</p>
+    <a class="sct-btn sct-btn-primary" href="{{ url_for('track') }}" style="margin-top:30px;">
+      Try Another Query
+    </a>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

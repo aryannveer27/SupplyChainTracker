@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}StellarNet — {{ provider|title }} OAuth{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --primary: #00f2fe;
+        --violet: #7f00ff;
+    }
+
+    body {
+        background: #070314 !important;
+        font-family: 'Outfit', sans-serif !important;
+        margin: 0;
+    }
+
+    .oauth-wrapper {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, #0d072b 0%, #03010b 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        z-index: 10000;
+    }
+
+    /* planet */
+    .planet-horizon {
+        position: absolute;
+        bottom: -52vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 160vw;
+        height: 90vh;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 -2px 0 rgba(180, 50, 255, .7), 0 -6px 30px rgba(127, 0, 255, .5),
+            inset 0 30px 80px rgba(0, 0, 0, .9);
+        border-top: 1.5px solid rgba(180, 50, 255, .55);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .planet-texture {
+        position: absolute;
+        inset: 0;
+        background-image:
+            repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(0, 242, 254, .04) 39px),
+            repeating-linear-gradient(90deg, transparent, transparent 55px, rgba(127, 0, 255, .05) 56px);
+        background-size: 56px 39px;
+        animation: pRev 60s linear infinite;
+        z-index: 1;
+    }
+
+    @keyframes pRev {
+        from {
+            background-position: 0 0
+        }
+
+        to {
+            background-position: 560px 0
+        }
+    }
+
+    .planet-shading {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% -10%, rgba(127, 0, 255, .4) 0%, rgba(10, 5, 28, .82) 45%, #03010b 80%);
+        z-index: 2;
+    }
+
+    .sun-glow {
+        position: absolute;
+        bottom: -28vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 130vw;
+        height: 72vh;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at 50% 0%, rgba(200, 60, 255, .7) 0%, rgba(0, 242, 254, .45) 20%, transparent 70%);
+        filter: blur(20px);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* card */
+    .oauth-card {
+        position: relative;
+        z-index: 5;
+        background: rgba(11, 7, 34, .6);
+        width: 480px;
+        max-width: 90vw;
+        padding: 52px 40px 40px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, .08);
+        box-shadow: 0 30px 70px rgba(0, 0, 0, .7), 0 0 45px rgba(127, 0, 255, .12),
+            inset 0 1px 1px rgba(255, 255, 255, .12);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        text-align: center;
+        animation: cardIn 1s cubic-bezier(.16, 1, .3, 1) forwards;
+    }
+
+    @keyframes cardIn {
+        0% {
+            opacity: 0;
+            transform: scale(.95) translateY(40px)
+        }
+
+        100% {
+            opacity: 1;
+            transform: none
+        }
+    }
+
+    .tc {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(0, 242, 254, .3);
+        pointer-events: none;
+    }
+
+    .tl {
+        top: 12px;
+        left: 12px;
+        border-right: none;
+        border-bottom: none
+    }
+
+    .tr {
+        top: 12px;
+        right: 12px;
+        border-left: none;
+        border-bottom: none
+    }
+
+    .bl {
+        bottom: 12px;
+        left: 12px;
+        border-right: none;
+        border-top: none
+    }
+
+    .br {
+        bottom: 12px;
+        right: 12px;
+        border-left: none;
+        border-top: none
+    }
+
+    .provider-icon {
+        width: 68px;
+        height: 68px;
+        border-radius: 18px;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, .05);
+        border: 1px solid rgba(255, 255, 255, .12);
+        box-shadow: 0 0 25px rgba(0, 242, 254, .15);
+    }
+
+    .provider-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 0 6px;
+        background: linear-gradient(135deg, #fff 20%, #00f2fe 70%, #a651ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .sub {
+        font-size: 12px;
+        color: #7b7896;
+        margin-bottom: 28px;
+        line-height: 1.6;
+    }
+
+    .steps {
+        text-align: left;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 28px;
+    }
+
+    .steps li {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        background: rgba(255, 255, 255, .03);
+        border: 1px solid rgba(255, 255, 255, .07);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        font-size: 12.5px;
+        color: #c2bede;
+        line-height: 1.5;
+    }
+
+    .step-num {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00f2fe, #7f00ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .steps a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    .steps a:hover {
+        color: #fff;
+    }
+
+    .badge-coming {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: rgba(0, 242, 254, .08);
+        border: 1px solid rgba(0, 242, 254, .2);
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 24px;
+        font-weight: 700;
+    }
+
+    .badge-coming::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0.2
+        }
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #fff;
+        text-decoration: none;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 45%, #7f00ff 100%);
+        box-shadow: 0 4px 15px rgba(0, 242, 254, .25);
+        transition: all .3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 242, 254, .35);
+    }
+
+    .btn-back::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent);
+        transform: skewX(-20deg);
+        transition: .7s;
+    }
+
+    .btn-back:hover::before {
+        left: 180%;
+    }
+</style>
+
+<div class="oauth-wrapper">
+    <div class="sun-glow"></div>
+    <div class="planet-horizon">
+        <div class="planet-texture"></div>
+        <div class="planet-shading"></div>
+    </div>
+
+    <div class="oauth-card">
+        <div class="tc tl"></div>
+        <div class="tc tr"></div>
+        <div class="tc bl"></div>
+        <div class="tc br"></div>
+
+        <!-- Provider icon -->
+        <div class="provider-icon">
+            {% if provider == 'google' %}
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4" />
+                <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853" />
+                <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                    fill="#FBBC05" />
+                <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335" />
+            </svg>
+            {% else %}
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#ffffff"
+                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+            </svg>
+            {% endif %}
+        </div>
+
+        <div class="badge-coming">OAuth Integration</div>
+
+        <h2>{{ provider|title }} Sign-In</h2>
+        <p class="sub">
+            OAuth with {{ provider|title }} requires registering this app on the<br>
+            {{ provider|title }} developer portal and configuring your credentials.
+        </p>
+
+        <ol class="steps">
+            {% if provider == 'google' %}
+            <li>
+                <span class="step-num">1</span>
+                <span>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud
+                        Console</a> → Create a new OAuth 2.0 Client ID.</span>
+            </li>
+            <li>
+                <span class="step-num">2</span>
+                <span>Set the Authorized Redirect URI to: <br><code
+                        style="color:#00f2fe">http://127.0.0.1:5000/oauth/google/callback</code></span>
+            </li>
+            <li>
+                <span class="step-num">3</span>
+                <span>Install Flask-Dance: <code style="color:#00f2fe">pip install flask-dance</code> and add your
+                    <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> to the app config.</span>
+            </li>
+            {% else %}
+            <li>
+                <span class="step-num">1</span>
+                <span>Go to <a href="https://github.com/settings/developers" target="_blank">GitHub Developer
+                        Settings</a> → New OAuth App.</span>
+            </li>
+            <li>
+                <span class="step-num">2</span>
+                <span>Set the Authorization Callback URL to: <br><code
+                        style="color:#00f2fe">http://127.0.0.1:5000/oauth/github/callback</code></span>
+            </li>
+            <li>
+                <span class="step-num">3</span>
+                <span>Install Flask-Dance: <code style="color:#00f2fe">pip install flask-dance</code> and add your
+                    <code>GITHUB_OAUTH_CLIENT_ID</code> and <code>GITHUB_OAUTH_CLIENT_SECRET</code> to the app
+                    config.</span>
+            </li>
+            {% endif %}
+            <li>
+                <span class="step-num">4</span>
+                <span>Contact your developer or refer to the <a href="https://flask-dance.readthedocs.io"
+                        target="_blank">Flask-Dance docs</a> to complete the integration.</span>
+            </li>
+        </ol>
+
+        <a href="{{ url_for('login') }}" class="btn-back">
+            ← Back to Login
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,910 @@
+{% extends 'base.html' %}
+
+{% block title %}StellarNet — Create Account{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --primary: #00f2fe;
+        --violet: #7f00ff;
+        --bg-space: #070314;
+        --glass-bg: rgba(11, 7, 34, 0.58);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--bg-space) !important;
+        font-family: 'Outfit', sans-serif !important;
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    .reg-wrapper {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, #0d072b 0%, #03010b 100%);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    #reg-canvas {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    /* ── Planet ── */
+    .planet-horizon {
+        position: absolute;
+        bottom: -52vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 160vw;
+        height: 90vh;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow:
+            0 -2px 0 rgba(180, 50, 255, 0.7),
+            0 -6px 30px rgba(127, 0, 255, 0.5),
+            0 -18px 65px rgba(0, 242, 254, 0.22),
+            inset 0 30px 80px rgba(0, 0, 0, 0.9);
+        border-top: 1.5px solid rgba(180, 50, 255, 0.55);
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .planet-texture {
+        position: absolute;
+        inset: 0;
+        background-image:
+            repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(0, 242, 254, 0.04) 39px),
+            repeating-linear-gradient(90deg, transparent, transparent 55px, rgba(127, 0, 255, 0.05) 56px);
+        background-size: 56px 39px;
+        animation: planetRevolve 60s linear infinite;
+        z-index: 1;
+    }
+
+    @keyframes planetRevolve {
+        from {
+            background-position: 0 0;
+        }
+
+        to {
+            background-position: 560px 0;
+        }
+    }
+
+    .planet-shading {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% -10%,
+                rgba(127, 0, 255, 0.40) 0%, rgba(10, 5, 28, 0.82) 45%, #03010b 80%);
+        z-index: 2;
+    }
+
+    .sun-glow {
+        position: absolute;
+        bottom: -28vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 130vw;
+        height: 72vh;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at 50% 0%,
+                rgba(200, 60, 255, 0.70) 0%,
+                rgba(0, 242, 254, 0.45) 20%,
+                rgba(127, 0, 255, 0.18) 45%,
+                transparent 70%);
+        filter: blur(20px);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* ── Floating stars ── */
+    .star-wrapper {
+        position: absolute;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .star-wrapper.s1 {
+        top: 15%;
+        left: 10%;
+        animation: float1 7s ease-in-out infinite;
+    }
+
+    .star-wrapper.s2 {
+        top: 30%;
+        right: 10%;
+        animation: float2 9s ease-in-out infinite 1s;
+    }
+
+    .star-wrapper.s3 {
+        top: 65%;
+        left: 8%;
+        animation: float3 8s ease-in-out infinite 2s;
+    }
+
+    .floating-star {
+        width: 32px;
+        height: 32px;
+        opacity: 0.55;
+        filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.5));
+    }
+
+    .s2 .floating-star {
+        width: 44px;
+        height: 44px;
+        filter: drop-shadow(0 0 10px rgba(127, 0, 255, 0.6));
+    }
+
+    .s3 .floating-star {
+        width: 22px;
+        height: 22px;
+    }
+
+    @keyframes float1 {
+
+        0%,
+        100% {
+            transform: translateY(0)
+        }
+
+        50% {
+            transform: translateY(-10px)
+        }
+    }
+
+    @keyframes float2 {
+
+        0%,
+        100% {
+            transform: translateY(0)
+        }
+
+        50% {
+            transform: translateY(-16px)
+        }
+    }
+
+    @keyframes float3 {
+
+        0%,
+        100% {
+            transform: translateY(0)
+        }
+
+        50% {
+            transform: translateY(-8px)
+        }
+    }
+
+    /* ── Card ── */
+    .reg-box {
+        position: relative;
+        background: var(--glass-bg);
+        width: 480px;
+        max-width: 92vw;
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 62px 40px 36px;
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7),
+            0 0 45px rgba(127, 0, 255, 0.12),
+            inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 5;
+        animation: cardEnter 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 242, 254, 0.2) transparent;
+    }
+
+    .reg-box::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .reg-box::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .reg-box::-webkit-scrollbar-thumb {
+        background: rgba(0, 242, 254, 0.2);
+        border-radius: 4px;
+    }
+
+    @keyframes cardEnter {
+        0% {
+            opacity: 0;
+            transform: scale(0.95) translateY(40px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Badge */
+    .reg-badge {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 78px;
+        height: 78px;
+        background: rgba(12, 8, 36, 0.85);
+        border: 1px solid rgba(0, 242, 254, 0.35);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 242, 254, 0.2);
+        backdrop-filter: blur(20px);
+        z-index: 10;
+    }
+
+    .reg-badge svg {
+        width: 40px;
+        height: 40px;
+        animation: pulseBadge 3.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseBadge {
+
+        0%,
+        100% {
+            filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.4));
+            transform: scale(1);
+        }
+
+        50% {
+            filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.7));
+            transform: scale(1.05);
+        }
+    }
+
+    /* Corner lines */
+    .tc {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        pointer-events: none;
+    }
+
+    .tl {
+        top: 12px;
+        left: 12px;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .tr {
+        top: 12px;
+        right: 12px;
+        border-left: none;
+        border-bottom: none;
+    }
+
+    .bl {
+        bottom: 12px;
+        left: 12px;
+        border-right: none;
+        border-top: none;
+    }
+
+    .br {
+        bottom: 12px;
+        right: 12px;
+        border-left: none;
+        border-top: none;
+    }
+
+    /* Branding */
+    .brand-logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 4px;
+    }
+
+    .brand-logo svg {
+        width: 70px;
+        height: 70px;
+        filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.45));
+        animation: floatLogo 6s ease-in-out infinite;
+    }
+
+    @keyframes floatLogo {
+
+        0%,
+        100% {
+            transform: translateY(0)
+        }
+
+        50% {
+            transform: translateY(-5px)
+        }
+    }
+
+    .brand-title {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-align: center;
+        margin: 4px 0 2px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #fff 10%, #00f2fe 55%, #a651ff 95%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+        font-size: 10px;
+        color: #7b7896;
+        text-align: center;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+    }
+
+    .card-heading {
+        font-size: 13px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.55);
+        text-align: center;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+
+    /* Form */
+    .form-group {
+        position: relative;
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #8c88a8;
+        margin-bottom: 7px;
+        display: block;
+        transition: color 0.3s;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        width: 17px;
+        height: 17px;
+        fill: #7c7797;
+        transition: fill 0.3s;
+        pointer-events: none;
+    }
+
+    .input-wrapper input,
+    .input-wrapper select {
+        width: 100%;
+        padding: 11px 16px 11px 44px;
+        font-size: 13px;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        outline: none;
+        transition: all 0.3s;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .input-wrapper input:focus,
+    .input-wrapper select:focus {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.2), inset 0 0 8px rgba(0, 242, 254, 0.08);
+    }
+
+    .form-group:focus-within .form-label {
+        color: var(--primary);
+    }
+
+    .form-group:focus-within .input-icon {
+        fill: var(--primary);
+    }
+
+    .input-wrapper select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjN2M3Nzk3IiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNyAxMGw1IDUgNS01eiIvPjwvc3ZnPg==');
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 18px;
+        cursor: pointer;
+    }
+
+    .input-wrapper select option {
+        background: #0b0821;
+        color: #fff;
+    }
+
+    .input-wrapper input::placeholder {
+        color: #555171;
+    }
+
+    /* Password strength bar */
+    .strength-bar {
+        height: 3px;
+        border-radius: 2px;
+        margin-top: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 2px;
+        transition: width 0.4s, background 0.4s;
+    }
+
+    /* Terms */
+    .terms-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .terms-row input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        accent-color: var(--primary);
+        margin-top: 2px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .terms-row label {
+        font-size: 11px;
+        color: #6e6a8a;
+        line-height: 1.5;
+    }
+
+    .terms-row a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    /* Submit */
+    .reg-box button[type="submit"] {
+        width: 100%;
+        padding: 13px;
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 45%, #7f00ff 100%);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25), 0 0 25px rgba(127, 0, 255, 0.15);
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .reg-box button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 242, 254, 0.35);
+    }
+
+    .reg-box button[type="submit"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transform: skewX(-20deg);
+        transition: 0.7s;
+    }
+
+    .reg-box button[type="submit"]:hover::before {
+        left: 180%;
+    }
+
+    /* Back to login */
+    .back-link {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 12px;
+        color: #6e6a8a;
+    }
+
+    .back-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        margin-left: 4px;
+        transition: color 0.2s;
+    }
+
+    .back-link a:hover {
+        color: #fff;
+        text-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+    }
+
+    /* Flash alerts */
+    .alert {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 100005;
+        background: rgba(14, 8, 38, 0.88);
+        border: 1px solid rgba(220, 53, 69, 0.45);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 14px;
+        padding: 14px 22px;
+        color: #ff8e95 !important;
+        font-weight: 600;
+        font-size: 13px;
+        animation: alertIn 4.8s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+    }
+
+    @keyframes alertIn {
+        0% {
+            transform: translateY(-20px) scale(0.9);
+            opacity: 0;
+        }
+
+        8% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        90% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(-25px) scale(0.9);
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    @media (max-width:480px) {
+        .reg-box {
+            padding: 55px 20px 28px;
+        }
+
+        .brand-title {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<div class="reg-wrapper">
+    <canvas id="reg-canvas"></canvas>
+    <div class="sun-glow"></div>
+    <div class="planet-horizon">
+        <div class="planet-texture"></div>
+        <div class="planet-shading"></div>
+    </div>
+
+    <!-- Floating sparkle stars -->
+    <div class="star-wrapper s1">
+        <svg class="floating-star" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 7.5 7.5 12 2 12C7.5 12 12 16.5 12 22C12 16.5 16.5 12 22 12C16.5 12 12 7.5 12 2Z"
+                fill="url(#sg1)" />
+            <defs>
+                <radialGradient id="sg1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(12 12) rotate(90) scale(10)">
+                    <stop offset="0%" stop-color="#fff" />
+                    <stop offset="45%" stop-color="#00f2fe" />
+                    <stop offset="100%" stop-color="rgba(0,242,254,0)" />
+                </radialGradient>
+            </defs>
+        </svg>
+    </div>
+    <div class="star-wrapper s2">
+        <svg class="floating-star" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 7.5 7.5 12 2 12C7.5 12 12 16.5 12 22C12 16.5 16.5 12 22 12C16.5 12 12 7.5 12 2Z"
+                fill="url(#sg2)" />
+            <defs>
+                <radialGradient id="sg2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(12 12) rotate(90) scale(10)">
+                    <stop offset="0%" stop-color="#fff" />
+                    <stop offset="45%" stop-color="#7f00ff" />
+                    <stop offset="100%" stop-color="rgba(127,0,255,0)" />
+                </radialGradient>
+            </defs>
+        </svg>
+    </div>
+    <div class="star-wrapper s3">
+        <svg class="floating-star" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 7.5 7.5 12 2 12C7.5 12 12 16.5 12 22C12 16.5 16.5 12 22 12C16.5 12 12 7.5 12 2Z"
+                fill="url(#sg3)" />
+            <defs>
+                <radialGradient id="sg3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(12 12) rotate(90) scale(10)">
+                    <stop offset="0%" stop-color="#fff" />
+                    <stop offset="45%" stop-color="#00f2fe" />
+                    <stop offset="100%" stop-color="rgba(0,242,254,0)" />
+                </radialGradient>
+            </defs>
+        </svg>
+    </div>
+
+    <!-- Registration Card -->
+    <div class="reg-box">
+
+        <!-- Top badge -->
+        <div class="reg-badge">
+            <svg viewBox="0 0 100 100" fill="none">
+                <g stroke="url(#rBg)" stroke-width="4" fill="none">
+                    <polygon points="50,15 62,38 85,50 62,62 50,85 38,62 15,50 38,38" stroke-linejoin="round" />
+                    <circle cx="50" cy="15" r="4" fill="#00f2fe" />
+                    <circle cx="85" cy="50" r="4" fill="#00f2fe" />
+                    <circle cx="50" cy="85" r="4" fill="#00f2fe" />
+                    <circle cx="15" cy="50" r="4" fill="#00f2fe" />
+                    <circle cx="50" cy="50" r="6" fill="#fff" />
+                </g>
+                <defs>
+                    <linearGradient id="rBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f2fe" />
+                        <stop offset="100%" stop-color="#7f00ff" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- Corner accents -->
+        <div class="tc tl"></div>
+        <div class="tc tr"></div>
+        <div class="tc bl"></div>
+        <div class="tc br"></div>
+
+        <!-- Logo & brand -->
+        <div class="brand-logo">
+            <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="rStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f2fe" />
+                        <stop offset="65%" stop-color="#4facfe" />
+                        <stop offset="100%" stop-color="#7f00ff" />
+                    </linearGradient>
+                    <radialGradient id="rCoreGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#00f2fe" />
+                        <stop offset="50%" stop-color="#7f00ff" stop-opacity="0.4" />
+                        <stop offset="100%" stop-color="#0c0728" stop-opacity="0" />
+                    </radialGradient>
+                    <filter id="rNeon" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="7" result="g" />
+                        <feMerge>
+                            <feMergeNode in="g" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <g stroke="rgba(0,242,254,0.16)" stroke-width="1.8" fill="none">
+                    <polygon points="205,70 250,150 205,230 115,230 70,150 115,70" />
+                </g>
+                <g fill="#00f2fe" opacity="0.6">
+                    <circle cx="150" cy="30" r="4" />
+                    <circle cx="205" cy="70" r="4" />
+                    <circle cx="250" cy="150" r="4" />
+                    <circle cx="205" cy="230" r="4" />
+                    <circle cx="95" cy="230" r="4" />
+                    <circle cx="70" cy="150" r="4" />
+                </g>
+                <path d="M150 72 L173 125 L230 130 L186 168 L200 225 L150 193 L100 225 L114 168 L70 130 L127 125 Z"
+                    fill="none" stroke="url(#rStarGrad)" stroke-width="9" stroke-linejoin="round"
+                    filter="url(#rNeon)" />
+                <g stroke="#4facfe" stroke-width="2.2" opacity="0.8">
+                    <line x1="150" y1="150" x2="150" y2="72" />
+                    <line x1="150" y1="150" x2="230" y2="130" />
+                    <line x1="150" y1="150" x2="200" y2="225" />
+                    <line x1="150" y1="150" x2="100" y2="225" />
+                    <line x1="150" y1="150" x2="70" y2="130" />
+                </g>
+                <circle cx="150" cy="150" r="32" fill="url(#rCoreGlow)" />
+                <circle cx="150" cy="150" r="11" fill="#00f2fe" filter="url(#rNeon)" />
+                <polygon points="150,140 159,150 150,160 141,150" fill="#fff" />
+            </svg>
+        </div>
+
+        <h1 class="brand-title">StellarNet</h1>
+        <p class="brand-subtitle">Create Your Cosmic Access Account</p>
+        <p class="card-heading">New Account Registration</p>
+
+        <!-- Registration Form -->
+        <form method="post" id="reg-form" novalidate>
+
+            <!-- Role -->
+            <div class="form-group">
+                <label class="form-label" for="role">Select Role</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5a2.5 2.5 0 0 1-1.5 2.3v3.2h-2v-3.2a2.5 2.5 0 0 1-1-2.3c0-1.4 1.1-2.5 2-2.5z" />
+                    </svg>
+                    <select name="role" id="role" required>
+                        {% for r in roles %}
+                        <option value="{{ r }}">{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                    <input type="text" name="username" id="username" placeholder="Choose a username" required
+                        autocomplete="username">
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                    <input type="email" name="email" id="email" placeholder="your@email.com" required
+                        autocomplete="email">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                    </svg>
+                    <input type="password" name="password" id="password" placeholder="Min 6 characters" required
+                        autocomplete="new-password" oninput="updateStrength(this.value)">
+                </div>
+                <div class="strength-bar">
+                    <div class="strength-fill" id="strength-fill"></div>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+                    </svg>
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Repeat password"
+                        required autocomplete="new-password">
+                </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="terms-row">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of
+                    StellarNet.</label>
+            </div>
+
+            <button type="submit" id="reg-submit-btn">CREATE ACCOUNT</button>
+        </form>
+
+        <div class="back-link">
+            Already have an account? <a href="{{ url_for('login') }}">Sign In</a>
+        </div>
+
+    </div><!-- end .reg-box -->
+</div>
+
+<script>
+    // ── Password strength meter ──────────────────────────────────────────────
+    function updateStrength(pw) {
+        const fill = document.getElementById('strength-fill');
+        let score = 0;
+        if (pw.length >= 6) score++;
+        if (pw.length >= 10) score++;
+        if (/[A-Z]/.test(pw)) score++;
+        if (/[0-9]/.test(pw)) score++;
+        if (/[^A-Za-z0-9]/.test(pw)) score++;
+        const pct = (score / 5) * 100;
+        const color = score <= 1 ? '#ff4d6d' : score <= 3 ? '#ffbe0b' : '#00f2fe';
+        fill.style.width = pct + '%';
+        fill.style.background = color;
+    }
+
+    // ── Client-side confirm-password check ──────────────────────────────────
+    document.getElementById('reg-form').addEventListener('submit', function (e) {
+        const pw = document.getElementById('password').value;
+        const cpw = document.getElementById('confirm_password').value;
+        const chk = document.getElementById('terms');
+        if (pw !== cpw) {
+            e.preventDefault();
+            showToast('Passwords do not match.');
+            return;
+        }
+        if (!chk.checked) {
+            e.preventDefault();
+            showToast('Please accept the Terms of Service.');
+            return;
+        }
+    });
+
+    function showToast(msg) {
+        const el = document.createElement('div');
+        el.className = 'alert';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+    }
+
+    // ── Canvas stars ─────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('reg-canvas');
+        const ctx = canvas.getContext('2d');
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+
+        const stars = Array.from({ length: 180 }, () => ({
+            x: Math.random() * W, y: Math.random() * H,
+            size: Math.random() * 1.4,
+            color: `rgba(255,255,255,${Math.random() * 0.7})`
+        }));
+        const twinklers = Array.from({ length: 30 }, () => ({
+            x: Math.random() * W, y: Math.random() * H,
+            size: Math.random() * 2 + 0.5,
+            speed: 0.03 + Math.random() * 0.04,
+            phase: Math.random() * Math.PI * 2
+        }));
+
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            stars.forEach(s => { ctx.fillStyle = s.color; ctx.fillRect(s.x, s.y, s.size, s.size); });
+            twinklers.forEach(s => {
+                s.phase += s.speed;
+                const a = (Math.sin(s.phase) + 1) / 2 * 0.75 + 0.25;
+                ctx.fillStyle = `rgba(255,255,255,${a})`;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = `rgba(0,242,254,${a * 0.18})`;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.size * 3.5, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    });
+</script>
+{% endblock %}

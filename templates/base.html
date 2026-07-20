@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StellarNet{% endblock %}</title>
+
+    <!-- Theme fonts + design system for app pages -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/theme.css') }}" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body data-sct-page>
+    <!-- Background Elements -->
+    <div class="sct-glow-field">
+        <div class="sct-glow sct-glow--1"></div>
+        <div class="sct-glow sct-glow--2"></div>
+        <div class="sct-glow sct-glow--3"></div>
+        <div class="sct-glow sct-glow--4"></div>
+    </div>
+    <div class="sct-particles" id="sctParticles"></div>
+
+    <div class="sct-shell">
+        <div class="sct-sidebar-backdrop" id="sctSidebarBackdrop"></div>
+
+        <!-- Sidebar -->
+        <aside class="sct-sidebar sct-glass" id="sctSidebar">
+            <div class="sct-sidebar-head">
+                <div class="sct-brand">
+                    <div class="sct-brand-icon" style="background:transparent; border:none; border-radius:0;">
+                        <!-- Custom Star Network Logo mimicking the provided image -->
+                        <svg width="44" height="44" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="navStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#00f2fe" />
+                                    <stop offset="65%" stop-color="#4facfe" />
+                                    <stop offset="100%" stop-color="#7f00ff" />
+                                </linearGradient>
+                                <radialGradient id="navCoreGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#00f2fe" />
+                                    <stop offset="50%" stop-color="#7f00ff" stop-opacity="0.4" />
+                                    <stop offset="100%" stop-color="#0c0728" stop-opacity="0" />
+                                </radialGradient>
+                                <filter id="navNeon" x="-30%" y="-30%" width="160%" height="160%">
+                                    <feGaussianBlur stdDeviation="7" result="g" />
+                                    <feMerge>
+                                        <feMergeNode in="g" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <g stroke="rgba(0,242,254,0.16)" stroke-width="1.8" fill="none">
+                                <polygon points="205,70 250,150 205,230 115,230 70,150 115,70" />
+                            </g>
+                            <g fill="#00f2fe" opacity="0.6">
+                                <circle cx="150" cy="30" r="4" />
+                                <circle cx="205" cy="70" r="4" />
+                                <circle cx="250" cy="150" r="4" />
+                                <circle cx="205" cy="230" r="4" />
+                                <circle cx="95" cy="230" r="4" />
+                                <circle cx="70" cy="150" r="4" />
+                            </g>
+                            <path
+                                d="M150 72 L173 125 L230 130 L186 168 L200 225 L150 193 L100 225 L114 168 L70 130 L127 125 Z"
+                                fill="none" stroke="url(#navStarGrad)" stroke-width="9" stroke-linejoin="round"
+                                filter="url(#navNeon)" />
+                            <g stroke="#4facfe" stroke-width="2.2" opacity="0.8">
+                                <line x1="150" y1="150" x2="150" y2="72" />
+                                <line x1="150" y1="150" x2="230" y2="130" />
+                                <line x1="150" y1="150" x2="200" y2="225" />
+                                <line x1="150" y1="150" x2="100" y2="225" />
+                                <line x1="150" y1="150" x2="70" y2="130" />
+                            </g>
+                            <circle cx="150" cy="150" r="32" fill="url(#navCoreGlow)" />
+                            <circle cx="150" cy="150" r="11" fill="#00f2fe" filter="url(#navNeon)" />
+                            <polygon points="150,140 159,150 150,160 141,150" fill="#fff" />
+                        </svg>
+                    </div>
+                    <span class="sct-brand-text">Stellar<span class="sct-accent">Net</span></span>
+                </div>
+                <button class="sct-sidebar-collapse" id="sctSidebarCollapseBtn" aria-label="Collapse Sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sct-sidebar-nav">
+                <a class="sct-nav-link {{ 'sct-active' if request.path == url_for('dashboard') }}"
+                    href="{{ url_for('dashboard') }}">
+                    <div class="sct-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg></div>
+                    <span class="sct-nav-label">Dashboard</span>
+                    <div class="sct-tooltip">Dashboard</div>
+                </a>
+                <a class="sct-nav-link {{ 'sct-active' if request.path == url_for('add_product') }}"
+                    href="{{ url_for('add_product') }}">
+                    <div class="sct-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg></div>
+                    <span class="sct-nav-label">Add / Update</span>
+                    <div class="sct-tooltip">Add / Update Product</div>
+                </a>
+                <a class="sct-nav-link {{ 'sct-active' if request.path == url_for('track') }}"
+                    href="{{ url_for('track') }}">
+                    <div class="sct-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg></div>
+                    <span class="sct-nav-label">Track Product</span>
+                    <div class="sct-tooltip">Track Product</div>
+                </a>
+            </nav>
+
+            <div class="sct-sidebar-foot">
+                <div class="sct-sidebar-profile">
+                    <div class="sct-profile-avatar">{{ (session.role or 'U')[0] | upper }}</div>
+                    <div class="sct-profile-info">
+                        <div class="sct-profile-name">{{ session.username }}</div>
+                        <div class="sct-profile-role">{{ session.role }}</div>
+                    </div>
+                </div>
+                <a class="sct-nav-link sct-nav-logout" href="{{ url_for('logout') }}">
+                    <div class="sct-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg></div>
+                    <span class="sct-nav-label">Logout</span>
+                    <div class="sct-tooltip">Logout</div>
+                </a>
+            </div>
+        </aside>
+
+        <div class="sct-main-col">
+            <!-- Navbar -->
+            <nav class="sct-navbar sct-glass-panel" id="sctNavbar">
+                <button class="sct-navbar-toggle" id="sctNavToggle" type="button" aria-label="Toggle menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+
+                <form class="sct-navbar-search" action="{{ url_for('track') }}" method="get">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" name="q" placeholder="Enter product ID to trace..." autocomplete="off">
+                    <div class="sct-search-shortcut">⌘K</div>
+                </form>
+
+                <div class="sct-navbar-spacer"></div>
+
+                <div class="sct-navbar-actions">
+                    <div class="sct-navbar-action-btn" title="Global Network Status">
+                        <div class="sct-status-indicator sct-status-live"></div>
+                        <span class="sct-status-text">Network: Live</span>
+                    </div>
+                    <div class="sct-navbar-bell sct-navbar-action-btn" title="Notifications">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="sct-notif-dot"></span>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="sct-main">
+                <div class="sct-flash-container">
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    {% for msg in messages %}
+                    <div class="sct-flash sct-slide-up-anim">
+                        <svg class="sct-flash-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span>{{ msg }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>
